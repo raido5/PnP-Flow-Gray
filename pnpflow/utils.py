@@ -169,14 +169,24 @@ def merge_cfg_from_list(cfg: CfgNode,
 
 def define_model(args):
     if args.model == "ot" or args.model == "gradient_step":
-        model = UNet(input_channels=args.num_channels,
-                     input_height=args.dim_image,
-                     ch=32,
-                     ch_mult=(1, 2, 4, 8),
-                     num_res_blocks=6,
-                     attn_resolutions=(16, 8),
-                     resamp_with_conv=True,
-                     )
+        if args.dataset == "mnist":
+            model = UNet(input_channels=args.num_channels,
+                         input_height=args.dim_image,
+                         ch=32,
+                         ch_mult=(1, 2),
+                         num_res_blocks=2,
+                         attn_resolutions=(),
+                         resamp_with_conv=True,
+                         )
+        else:
+            model = UNet(input_channels=args.num_channels,
+                         input_height=args.dim_image,
+                         ch=32,
+                         ch_mult=(1, 2, 4, 8),
+                         num_res_blocks=6,
+                         attn_resolutions=(16, 8),
+                         resamp_with_conv=True,
+                         )
         return (model, None)
 
     elif args.model == "diffusion":
@@ -570,6 +580,10 @@ def postprocess(img, args):
     if args.model == "ot" or args.model == "gradient_step" or args.model == "diffusion":
         if args.dataset == "afhq_cat":
             img = (img + 1) / 2
+        elif args.dataset == "mnist":
+            invTrans = v2.Normalize(
+                mean=[-0.5 / 0.5], std=[1./0.5])  # 1 canal au lieu de 3
+            img = invTrans(img)
         else:
             invTrans = v2.Normalize(
                 mean=[-0.5 / 0.5, -0.5 / 0.5, -0.5 / 0.5], std=[1./0.5, 1./0.5, 1./0.5])

@@ -109,6 +109,27 @@ class DataLoaders:
                 shuffle=True,
                 collate_fn=custom_collate, drop_last=True)
 
+        elif self.dataset_name == 'mnist':
+            transform = v2.Compose([
+                v2.Resize((32, 32)),
+                v2.ToTensor(),
+                v2.Normalize(mean=[0.5], std=[0.5])  # 1 canal au lieu de 3
+            ])
+
+            train_dataset = datasets.MNIST(
+                root='./data', train=True, download=True, transform=transform)
+            val_dataset = datasets.MNIST(
+                root='./data', train=False, download=True, transform=transform)
+            test_dataset = datasets.MNIST(
+                root='./data', train=False, download=True, transform=transform)
+
+            train_loader = DataLoader(
+                train_dataset, batch_size=self.batch_size_train, shuffle=True)
+            val_loader = DataLoader(
+                val_dataset, batch_size=self.batch_size_test, shuffle=False)
+            test_loader = DataLoader(
+                test_dataset, batch_size=self.batch_size_test, shuffle=False)
+
         else:
             raise ValueError("The dataset your entered does not exist")
 
