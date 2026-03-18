@@ -129,7 +129,9 @@ def main():
                 sigma_noise = 0.3
             elif args.noise_type == 'gaussian':
                 sigma_noise = 0.05
-            if args.dim_image == 128:
+            if args.dim_image == 32:
+                half_size_mask = 8
+            elif args.dim_image == 128:
                 half_size_mask = 20
             elif args.dim_image == 256:
                 half_size_mask = 40
@@ -151,6 +153,9 @@ def main():
             degradation = RandomInpainting(p)
 
         elif args.problem == "superresolution":
+            if args.dim_image == 32:
+                sf = 2
+                print('Superresolution with scale factor 2')
             if args.dim_image == 128:
                 print('Superresolution with scale factor 2')
                 sf = 2
@@ -162,10 +167,12 @@ def main():
 
             elif args.noise_type == 'gaussian':
                 sigma_noise = 0.05
-            degradation = Superresolution(sf, args.dim_image)
+            degradation = Superresolution(sf, args.dim_image, device=device)
 
         elif args.problem == "gaussian_deblurring_FFT":
-            if args.dim_image == 128:
+            if args.dim_image == 32:
+                sigma_blur = 1.0
+            elif args.dim_image == 128:
                 sigma_blur = 1.0
             elif args.dim_image == 256:
                 sigma_blur = 3.0
@@ -174,7 +181,10 @@ def main():
                 sigma_noise = 0.3
             elif args.noise_type == 'gaussian':
                 sigma_noise = 0.05
-            kernel_size = 61
+            if args.dim_image == 32:
+                kernel_size = 7
+            else:
+                kernel_size = 61
             degradation = GaussianDeblurring(
                 sigma_blur, kernel_size, "fft", args.num_channels, args.dim_image, device)
 
