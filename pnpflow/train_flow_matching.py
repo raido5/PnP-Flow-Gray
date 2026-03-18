@@ -47,16 +47,19 @@ class FLOW_MATCHING(object):
 
     def train_FM_model(self, train_loader, opt, num_epoch):
 
-        ft_extractor = InceptionFeatureExtractor(save_path="features")
+        #ft_extractor = InceptionFeatureExtractor(save_path="features")
         if self.args.dataset == "celeba":
-            test_feat = ft_extractor.get_features(CelebADataset(
-                img_dir_celeba, partition_csv_celeba, partition=2, transform=transforms.Compose([transforms.CenterCrop(178), transforms.Resize([self.args.dim_image, self.args.dim_image]),])), name=f"celeba{self.args.dim_image}_test")
+                pass
+            #_feat = ft_extractor.get_features(CelebADataset(
+                #img_dir_celeba, partition_csv_celeba, partition=2, transform=transforms.Compose([transforms.CenterCrop(178), transforms.Resize([self.args.dim_image, self.args.dim_image]),])), name=f"celeba{self.args.dim_image}_test")
         elif self.args.dataset == "afhq_cat":
-            test_feat = AFHQDataset(
-                img_dir_afhq, batchsize=self.batch_size_test, transform = transforms.Compose([transforms.Resize((256, 256)),
-                transforms.ToTensor()]))
+            pass
+            #test_feat = AFHQDataset(
+             #   img_dir_afhq, batchsize=self.batch_size_test, transform = transforms.Compose([transforms.Resize((256, 256)),
+              #  transforms.ToTensor()]))
         else:
-            raise ValueError(f"Unknown dataset {self.args.dataset}")
+            pass
+            #raise ValueError(f"Unknown dataset {self.args.dataset}")
             
 
         tq = tqdm(range(num_epoch), desc='loss')
@@ -112,13 +115,13 @@ class FLOW_MATCHING(object):
                 torch.save(self.model.state_dict(),
                            self.model_path + 'model_{}.pt'.format(ep))
                 # evaluate FID
-                print("Computing FID 5K")
-                num_gen = 5_000
-                fid_value = self.compute_fid(num_gen, test_feat,
-                                        ft_extractor, batch_size=124, integration_method="euler", integration_steps=10)
+                #print("Computing FID 5K")
+                #num_gen = 5_000
+                #fid_value = self.compute_fid(num_gen, test_feat,
+                #                        ft_extractor, batch_size=124, integration_method="euler", integration_steps=10)
 
-                with open(self.save_path + f'FID_{(num_gen // 1000)}k.txt', 'a') as file:
-                    file.write(f'Epoch: {ep}, FID: {fid_value}\n')
+                #with open(self.save_path + f'FID_{(num_gen // 1000)}k.txt', 'a') as file:
+                #    file.write(f'Epoch: {ep}, FID: {fid_value}\n')
 
     def apply_flow_matching(self, NO_samples):
         self.model.eval()
