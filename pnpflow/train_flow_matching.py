@@ -23,8 +23,8 @@ from torchdiffeq import odeint_adjoint as odeint
 import pnpflow.fid_score as fs
 from pnpflow.dataloaders import DataLoaders
 import pnpflow.utils as utils
-from fld.metrics.FID import FID
-from fld.features.InceptionFeatureExtractor import InceptionFeatureExtractor
+# from fld.metrics.FID import FID
+# from fld.features.InceptionFeatureExtractor import InceptionFeatureExtractor
 from pnpflow.dataloaders import CelebADataset, AFHQDataset
 from torchvision import transforms
 from torchvision.utils import save_image
