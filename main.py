@@ -92,6 +92,12 @@ def main():
                     args.dataset, args.model)
             load_model(args.model, model, state, download=False,
                        checkpoint_path=model_path, dataset=None,  device=device)
+            if args.num_channels == 1:
+                import torch.nn as nn
+                model.begin_conv = nn.Conv2d(1, 32, 3, padding=1).to(device)
+                model.end_conv[2] = nn.Conv2d(32, 1, 3, padding=1).to(device)
+                model.output_channels = 1
+
             model.eval()
 
         elif args.model == "rectified":

@@ -169,7 +169,7 @@ def merge_cfg_from_list(cfg: CfgNode,
 
 def define_model(args):
     if args.model == "ot" or args.model == "gradient_step":
-        model = UNet(input_channels=args.num_channels,
+        model = UNet(input_channels=3,
                      input_height=args.dim_image,
                      ch=32,
                      ch_mult=(1, 2, 4, 8),
@@ -222,7 +222,7 @@ def load_model(name_model, model, state, download=False, checkpoint_path=None, d
             gdown.download(url, output_path + "model_final.pt", quiet=False)
             checkpoint_path = output_path + "model_final.pt"
 
-        model.load_state_dict(torch.load(checkpoint_path, map_location=device))
+        model.load_state_dict(torch.load(checkpoint_path, map_location=device), strict=False)
         model.to(device)
 
     elif name_model == "rectified":
@@ -570,6 +570,10 @@ def postprocess(img, args):
     if args.model == "ot" or args.model == "gradient_step" or args.model == "diffusion":
         if args.dataset == "afhq_cat":
             img = (img + 1) / 2
+        elif args.num_channels == 1:  # grayscale
+            invTrans = v2.Normalize(
+                mean=[-0.5 / 0.5], std=[1./0.5])
+            img = invTrans(img)
         else:
             invTrans = v2.Normalize(
                 mean=[-0.5 / 0.5, -0.5 / 0.5, -0.5 / 0.5], std=[1./0.5, 1./0.5, 1./0.5])

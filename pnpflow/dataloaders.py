@@ -27,7 +27,7 @@ class DataLoaders:
                 v2.CenterCrop(178),
                 v2.Resize((128, 128)),
                 v2.ToTensor(),
-                v2.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+                v2.Normalize(mean=[0.5], std=[0.5])
             ])
             # Paths
             img_dir = './data/celeba/img_align_celeba/'
@@ -80,7 +80,7 @@ class DataLoaders:
             transform = v2.Compose([
                 v2.Resize((256, 256)),
                 v2.ToTensor(),
-                v2.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+                v2.Normalize(mean=[0.5], std=[0.5])
             ])
 
             # transform = False
@@ -142,7 +142,7 @@ class CelebADataset(Dataset):
             warnings.warn(f"File not found: {img_path}. Skipping.")
             return None, None
 
-        image = Image.open(img_path).convert('RGB')
+        image = Image.open(img_path).convert('L')
 
         if self.transform:
             image = self.transform(image)
