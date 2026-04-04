@@ -171,7 +171,7 @@ class CelebAHQDataset(Dataset):
             warnings.warn(f"File not found: {img_path}. Skipping.")
             return None, None
 
-        image = Image.open(img_path).convert('RGB')
+        image = Image.open(img_path).convert('L')
 
         if self.transform:
             image = self.transform(image)
@@ -202,7 +202,7 @@ class AFHQDataset(Dataset):
             warnings.warn(f"File not found: {img_path}. Skipping.")
             return None, None
 
-        image = Image.open(img_path).convert('RGB')
+        image = Image.open(img_path).convert('L')
 
         if self.transform:
             image = self.transform(image)

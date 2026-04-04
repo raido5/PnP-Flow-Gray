@@ -47,16 +47,16 @@ class FLOW_MATCHING(object):
 
     def train_FM_model(self, train_loader, opt, num_epoch):
 
-        ft_extractor = InceptionFeatureExtractor(save_path="features")
-        if self.args.dataset == "celeba":
-            test_feat = ft_extractor.get_features(CelebADataset(
-                img_dir_celeba, partition_csv_celeba, partition=2, transform=transforms.Compose([transforms.CenterCrop(178), transforms.Resize([self.args.dim_image, self.args.dim_image]),])), name=f"celeba{self.args.dim_image}_test")
-        elif self.args.dataset == "afhq_cat":
-            test_feat = AFHQDataset(
-                img_dir_afhq, batchsize=self.batch_size_test, transform = transforms.Compose([transforms.Resize((256, 256)),
-                transforms.ToTensor()]))
-        else:
-            raise ValueError(f"Unknown dataset {self.args.dataset}")
+        #ft_extractor = InceptionFeatureExtractor(save_path="features")
+        #if self.args.dataset == "celeba":
+        #    test_feat = ft_extractor.get_features(CelebADataset(
+        #        img_dir_celeba, partition_csv_celeba, partition=2, transform=transforms.Compose([transforms.CenterCrop(178), transforms.Resize([self.args.dim_image, self.args.dim_image]),])), name=f"celeba{self.args.dim_image}_test")
+        #elif self.args.dataset == "afhq_cat":
+        #    test_feat = AFHQDataset(
+        #        img_dir_afhq, batchsize=self.batch_size_test, transform = transforms.Compose([transforms.Resize((256, 256)),
+        #        transforms.ToTensor()]))
+        #else:
+        #    raise ValueError(f"Unknown dataset {self.args.dataset}")
             
 
         tq = tqdm(range(num_epoch), desc='loss')
@@ -64,8 +64,8 @@ class FLOW_MATCHING(object):
             for iteration, (x, labels) in enumerate(train_loader):
                 if x.size(0) == 0:
                     continue
-                if iteration > 20:
-                    break
+                #if iteration > 500:
+                #    break
                 print(f'Epoch: {ep}, iter: {iteration}')
                 x = x.to(self.device)
                 z = torch.randn(
@@ -236,8 +236,17 @@ class FLOW_MATCHING(object):
             file.write(f'Learning rate: {self.lr}\n')
 
         # start training
-        opt = torch.optim.Adam(self.model.parameters(), lr=self.args.lr)
-        self.train_FM_model(train_loader, opt, num_epoch=self.args.num_epoch)
+        if self.args.num_channels == 1:
+            # Fine-tuning : geler toutes les couches sauf begin_conv et end_conv
+            for name, param in self.model.named_parameters():
+                if 'begin_conv' not in name and 'end_conv' not in name:
+                    param.requires_grad = False
+            # Optimiser uniquement les couches non gelées
+            opt = torch.optim.Adam(
+                filter(lambda p: p.requires_grad, self.model.parameters()), 
+                lr=self.args.lr)
+        else:
+            opt = torch.optim.Adam(self.model.parameters(), lr=self.args.lr)
 
         # save final model
         torch.save(self.model.state_dict(), self.model_path + 'model_final.pt')

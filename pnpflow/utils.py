@@ -169,14 +169,14 @@ def merge_cfg_from_list(cfg: CfgNode,
 
 def define_model(args):
     if args.model == "ot" or args.model == "gradient_step":
-        model = UNet(input_channels=3,
-                     input_height=args.dim_image,
-                     ch=32,
-                     ch_mult=(1, 2, 4, 8),
-                     num_res_blocks=6,
-                     attn_resolutions=(16, 8),
-                     resamp_with_conv=True,
-                     )
+        model = UNet(input_channels=args.num_channels,
+                    input_height=args.dim_image,
+                    ch=32,
+                    ch_mult=(1, 2, 4, 8),
+                    num_res_blocks=6,
+                    attn_resolutions=(16, 8),
+                    resamp_with_conv=True,
+                    )
         return (model, None)
 
     elif args.model == "diffusion":
@@ -222,7 +222,7 @@ def load_model(name_model, model, state, download=False, checkpoint_path=None, d
             gdown.download(url, output_path + "model_final.pt", quiet=False)
             checkpoint_path = output_path + "model_final.pt"
 
-        model.load_state_dict(torch.load(checkpoint_path, map_location=device), strict=False)
+        model.load_state_dict(torch.load(checkpoint_path, map_location=device), strict=True)
         model.to(device)
 
     elif name_model == "rectified":
