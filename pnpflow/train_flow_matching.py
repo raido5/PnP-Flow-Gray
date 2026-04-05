@@ -236,18 +236,8 @@ class FLOW_MATCHING(object):
             file.write(f'Learning rate: {self.lr}\n')
 
         # start training
-        if self.args.num_channels == 1:
-            # Fine-tuning : geler toutes les couches sauf begin_conv et end_conv
-            for name, param in self.model.named_parameters():
-                if 'begin_conv' not in name and 'end_conv' not in name:
-                    param.requires_grad = False
-            # Optimiser uniquement les couches non gelées
-            opt = torch.optim.Adam(
-                filter(lambda p: p.requires_grad, self.model.parameters()), 
-                lr=self.args.lr)
-        else:
-            opt = torch.optim.Adam(self.model.parameters(), lr=self.args.lr)
-
+        opt = torch.optim.Adam(self.model.parameters(), lr=self.args.lr)
+        self.train_FM_model(train_loader, opt, num_epoch=self.args.num_epoch)
         # save final model
         torch.save(self.model.state_dict(), self.model_path + 'model_final.pt')
 
