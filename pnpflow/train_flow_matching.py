@@ -64,8 +64,8 @@ class FLOW_MATCHING(object):
             for iteration, (x, labels) in enumerate(train_loader):
                 if x.size(0) == 0:
                     continue
-                #if iteration > 500:
-                #    break
+                if iteration > 500:
+                    break
                 print(f'Epoch: {ep}, iter: {iteration}')
                 x = x.to(self.device)
                 z = torch.randn(
@@ -95,7 +95,7 @@ class FLOW_MATCHING(object):
                 x1 = x1[j]
                 xt = t1 * x1 + (1 - t1) * x0
                 loss = torch.sum(
-                    (self.model(xt, t1.squeeze()) - (x1 - x0))**2) / x.shape[0]
+                    (self.model(xt, t1.view(-1)) - (x1 - x0))**2) / x.shape[0]
                 opt.zero_grad()
                 loss.backward()
                 opt.step()
