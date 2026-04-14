@@ -210,7 +210,7 @@ def main():
         else:
             raise ValueError("The method your entered does not exist")
 
-        method.run_method(data_loaders, degradation, sigma_noise)
+        method.run_method(data_loaders, degradation, sigma_noise) #Noise
 
 
 if __name__ == "__main__":

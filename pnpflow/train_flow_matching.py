@@ -107,18 +107,21 @@ class FLOW_MATCHING(object):
 
             # save samples, plot them, and compute FID on small dataset
             self.sample_plot(x, ep)
-            if ep % 5 == 0:
+            #if ep % 5 == 0:
                 # save model
+            #    torch.save(self.model.state_dict(),
+            #               self.model_path + 'model_{}.pt'.format(ep))
+            #    # evaluate FID
+            #    print("Computing FID 5K")
+            #    num_gen = 5_000
+            #    fid_value = self.compute_fid(num_gen, test_feat,
+            #                            ft_extractor, batch_size=124, integration_method="euler", integration_steps=10)
+            #
+            #    with open(self.save_path + f'FID_{(num_gen // 1000)}k.txt', 'a') as file:
+            #        file.write(f'Epoch: {ep}, FID: {fid_value}\n')
+            if ep % 5 == 0:
                 torch.save(self.model.state_dict(),
-                           self.model_path + 'model_{}.pt'.format(ep))
-                # evaluate FID
-                print("Computing FID 5K")
-                num_gen = 5_000
-                fid_value = self.compute_fid(num_gen, test_feat,
-                                        ft_extractor, batch_size=124, integration_method="euler", integration_steps=10)
-
-                with open(self.save_path + f'FID_{(num_gen // 1000)}k.txt', 'a') as file:
-                    file.write(f'Epoch: {ep}, FID: {fid_value}\n')
+                        self.model_path + 'model_{}.pt'.format(ep))
 
     def apply_flow_matching(self, NO_samples):
         self.model.eval()
@@ -160,11 +163,13 @@ class FLOW_MATCHING(object):
                                'train_samples_ep_{}.pdf'.format(ep), self.args)
 
     def generate_samples(self, integration_method="dopri5", tol=1e-5,
-                         n_samples=1028, batch_size=None, num_channels=3,
+                         n_samples=1028, batch_size=None, num_channels=None,
                          integration_steps=100, tmax=1):
         """
         Return a tensor of size (TODO).
         """
+        if num_channels is None:
+            num_channels = self.num_channels
 
         if batch_size is None:
             batch_size = n_samples

@@ -37,7 +37,7 @@ class PNP_FLOW(object):
 
     def grad_datafit(self, x, y, H, H_adj):
         if self.args.noise_type == 'gaussian':
-            return H_adj(H(x) - y) / (self.args.sigma_noise**2)
+            return H_adj(H(x) - y) / (self.args.sigma_noise**2) #Gradient pour débruiter
         elif self.args.noise_type == 'laplace':
             return H_adj(2*torch.heaviside(H(x)-y, torch.zeros_like(H(x)))-1)/self.args.sigma_noise
         else:
@@ -76,7 +76,7 @@ class PNP_FLOW(object):
             if self.args.noise_type == 'gaussian':
                 noisy_img = H(clean_img.clone().to(self.device))
                 torch.manual_seed(batch)
-                noisy_img += torch.randn_like(noisy_img) * sigma_noise
+                noisy_img += torch.randn_like(noisy_img) * sigma_noise #NOISE ADDED
             elif self.args.noise_type == 'laplace':
                 noisy_img = H(clean_img.clone().to(self.device))
                 noise = torch.distributions.laplace.Laplace(
@@ -108,7 +108,7 @@ class PNP_FLOW(object):
                     lr_t = self.learning_rate_strat(lr, t1)
 
                     z = x - lr_t * \
-                        self.grad_datafit(x, noisy_img, H, H_adj)
+                        self.grad_datafit(x, noisy_img, H, H_adj) #ICI
 
                     x_new = torch.zeros_like(x)
                     for _ in range(num_samples):
