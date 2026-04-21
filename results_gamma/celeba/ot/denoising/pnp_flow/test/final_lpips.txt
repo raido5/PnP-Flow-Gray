@@ -1,0 +1,2 @@
+lpips_rec lpips_noisy steps_pnp lr_pnp gamma_style num_samples alpha 
+0.0966 0.5912 100 1.0 alpha_1_minus_t 5 1.0 

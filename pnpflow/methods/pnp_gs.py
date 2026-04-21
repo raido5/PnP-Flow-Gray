@@ -26,6 +26,11 @@ class PROX_PNP(object):
             return H_adj(H(x) - y) / (self.args.sigma_noise**2)
         elif self.args.noise_type == 'laplace':
             return H_adj(2*torch.heaviside(H(x)-y, torch.zeros_like(H(x)))-1)/self.args.sigma_noise
+        elif self.args.noise_type == 'gamma':
+            # orignal gradient for multiplicative gamma noise
+            # return self.args.sigma_noise/x - self.args.sigma_noise * y / (x ** 2)
+            gradient = self.args.sigma_noise * (x - y)
+            return gradient
         else:
             raise ValueError('Noise type not supported')
 
@@ -108,6 +113,11 @@ class PROX_PNP(object):
                 noise = torch.distributions.laplace.Laplace(
                     torch.zeros_like(noisy_img), sigma_noise * torch.ones_like(noisy_img)).sample().to(self.device)
                 noisy_img += noise
+            elif self.args.noise_type == 'gamma':
+                alpha_g = beta_g = sigma_noise
+                noise = torch.distributions.Gamma(concentration=torch.tensor(alpha_g),
+                            rate=torch.tensor(beta_g)).sample(sample_shape=noisy_img.shape).to(self.device)
+                noisy_img = noisy_img * noise
             else:
                 raise ValueError('Noise type not supported')
 

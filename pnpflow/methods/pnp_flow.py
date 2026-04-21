@@ -1,10 +1,12 @@
 import torch
 import torch
+import torch.nn.functional as F
 import numpy as np
 import os
 from time import perf_counter
 import pnpflow.image_generation.models.utils as mutils
 import pnpflow.utils as utils
+from pnpflow.methods.prior import build_adaptive_weights, adaptive_quadratic_prior
 
 
 class PNP_FLOW(object):
@@ -40,6 +42,30 @@ class PNP_FLOW(object):
             return H_adj(H(x) - y) / (self.args.sigma_noise**2) #Gradient pour débruiter
         elif self.args.noise_type == 'laplace':
             return H_adj(2*torch.heaviside(H(x)-y, torch.zeros_like(H(x)))-1)/self.args.sigma_noise
+        elif self.args.noise_type == 'gamma':
+            # orignal gradient for multiplicative gamma noise
+            # return self.args.sigma_noise/x - self.args.sigma_noise * y / (x ** 2)
+
+            # my prior term
+            wx, wy = build_adaptive_weights(
+                y,
+                tau=None,
+                smooth_kernel_size=5,
+                weight_mode="exp"
+            )
+
+            prior_grad, energy, _, _ = adaptive_quadratic_prior(
+                x=x,
+                wx=wx,
+                wy=wy,
+                lam=1.0,
+                return_energy=True
+            )
+
+            # add preconditioner to the gradient
+            gradient = self.args.sigma_noise * (x - y)
+
+            return gradient
         else:
             raise ValueError('Noise type not supported')
 
@@ -59,10 +85,13 @@ class PNP_FLOW(object):
         if self.args.noise_type == 'gaussian':
             self.args.lr_pnp = sigma_noise**2 * self.args.lr_pnp
             lr = self.args.lr_pnp
-
         elif self.args.noise_type == 'laplace':
             self.args.lr_pnp = sigma_noise * self.args.lr_pnp
             lr = self.args.lr_pnp
+        # 设置学习率
+        elif self.args.noise_type == 'gamma':
+            # Here we didn't know the proper learning rate for gamma noise, so we set it to a fixed value for now.
+            lr = 0.5
         else:
             raise ValueError('Noise type not supported')
 
@@ -82,6 +111,22 @@ class PNP_FLOW(object):
                 noise = torch.distributions.laplace.Laplace(
                     torch.zeros_like(noisy_img), sigma_noise * torch.ones_like(noisy_img)).sample().to(self.device)
                 noisy_img += noise
+            elif self.args.noise_type == 'gamma':
+                # H(x)=x
+                noisy_img = H(clean_img.clone().to(self.device))
+                # Here sigma_noise is the look number (L)
+                # when set alpha and beta equal to L
+                # the mean and variance of the gamma noise will be 1 and 1/L respectively,
+                # which is a common setting for simulating speckle noise in SAR images
+                alpha = beta = sigma_noise
+                noise = torch.distributions.Gamma(concentration=torch.tensor(alpha),
+                            rate=torch.tensor(beta)).sample(sample_shape=noisy_img.shape).to(self.device)
+                noisy_img = noisy_img * noise
+                # If we clamp the noisy image to [0, 1], it may cause issues with the gamma noise model,
+                # as the noise can naturally produce values greater than 1.
+                # Clamping would distort the noise distribution
+                # Therefore, we should avoid clamping the noisy image in this case.
+                # noisy_img = torch.clamp(noisy_img, 0, 1)
             else:
                 raise ValueError('Noise type not supported')
 

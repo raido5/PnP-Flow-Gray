@@ -123,6 +123,8 @@ def main():
                 sigma_noise = 0.3
             elif args.noise_type == 'gaussian':
                 sigma_noise = 0.2
+            elif args.noise_type == 'gamma':
+                sigma_noise = 4.0  # look number L=4 (SAR convention)
             degradation = Denoising()
 
         elif args.problem == "inpainting":
@@ -130,6 +132,8 @@ def main():
                 sigma_noise = 0.3
             elif args.noise_type == 'gaussian':
                 sigma_noise = 0.05
+            elif args.noise_type == 'gamma':
+                sigma_noise = 4.0
             if args.dim_image == 128:
                 half_size_mask = 20
             elif args.dim_image == 256:
@@ -141,6 +145,8 @@ def main():
                 sigma_noise = 0.3
             elif args.noise_type == 'gaussian':
                 sigma_noise = 0.05
+            elif args.noise_type == 'gamma':
+                sigma_noise = 4.0
             degradation = PaintbrushInpainting()
 
         elif args.problem == "random_inpainting":
@@ -148,6 +154,8 @@ def main():
                 sigma_noise = 0.3
             elif args.noise_type == 'gaussian':
                 sigma_noise = 0.01
+            elif args.noise_type == 'gamma':
+                sigma_noise = 4.0
             p = 0.7
             degradation = RandomInpainting(p)
 
@@ -160,9 +168,10 @@ def main():
                 sf = 4
             if args.noise_type == 'laplace':
                 sigma_noise = 0.3
-
             elif args.noise_type == 'gaussian':
                 sigma_noise = 0.05
+            elif args.noise_type == 'gamma':
+                sigma_noise = 4.0
             degradation = Superresolution(sf, args.dim_image)
 
         elif args.problem == "gaussian_deblurring_FFT":
@@ -175,6 +184,8 @@ def main():
                 sigma_noise = 0.3
             elif args.noise_type == 'gaussian':
                 sigma_noise = 0.05
+            elif args.noise_type == 'gamma':
+                sigma_noise = 4.0
             kernel_size = 61
             degradation = GaussianDeblurring(
                 sigma_blur, kernel_size, "fft", args.num_channels, args.dim_image, device)
@@ -190,6 +201,9 @@ def main():
         elif args.noise_type == 'gaussian':
             args.save_path = os.path.join(
                 args.root, 'results', args.dataset, args.model, args.problem, args.method, args.eval_split)
+        elif args.noise_type == 'gamma':
+            args.save_path = os.path.join(
+                args.root, 'results_gamma', args.dataset, args.model, args.problem, args.method, args.eval_split)
         try:
             os.makedirs(args.save_path)
         except FileExistsError:

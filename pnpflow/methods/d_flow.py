@@ -76,9 +76,16 @@ class D_FLOW(object):
             (clean_img, labels) = next(loader)
             self.args.batch = batch
 
-            noisy_img = H(clean_img.clone().to(self.device))
-            torch.manual_seed(batch)
-            noisy_img += torch.randn_like(noisy_img) * sigma_noise
+            if self.args.noise_type == 'gamma':
+                noisy_img = H(clean_img.clone().to(self.device))
+                alpha_g = beta_g = sigma_noise
+                noise = torch.distributions.Gamma(concentration=torch.tensor(alpha_g),
+                            rate=torch.tensor(beta_g)).sample(sample_shape=noisy_img.shape).to(self.device)
+                noisy_img = noisy_img * noise
+            else:
+                noisy_img = H(clean_img.clone().to(self.device))
+                torch.manual_seed(batch)
+                noisy_img += torch.randn_like(noisy_img) * sigma_noise
             noisy_img = noisy_img.to(self.device)
             clean_img = clean_img.to('cpu')
 
@@ -112,8 +119,14 @@ class D_FLOW(object):
                     reg = - torch.clamp(self.gaussian(z), min=-1e6, max=1e6) + (
                         d - 1) * torch.log(torch.sqrt(torch.sum(z**2, dim=(1, 2, 3))) + 1e-5)
 
-                    loss = (torch.sum((H(self.forward_flow_matching(z)) -
-                            noisy_img)**2, dim=(1, 2, 3)) + self.args.lmbda * reg).sum()
+                    x_hat = H(self.forward_flow_matching(z))
+                    if self.args.noise_type == 'gamma':
+                        # neg log-likelihood for gamma: L*log(H(x)) + L*y/H(x)
+                        datafit = sigma_noise * torch.sum(
+                            torch.log(x_hat) + noisy_img / x_hat, dim=(1, 2, 3))
+                    else:
+                        datafit = torch.sum((x_hat - noisy_img)**2, dim=(1, 2, 3))
+                    loss = (datafit + self.args.lmbda * reg).sum()
                     loss.backward()  # Compute gradients
                     return loss
 

@@ -48,6 +48,12 @@ class FLOW_PRIORS(object):
                 noise = torch.distributions.laplace.Laplace(
                     torch.zeros_like(noisy_img), sigma_noise * torch.ones_like(noisy_img)).sample().to(self.device)
                 noisy_img += noise
+            elif self.args.noise_type == 'gamma':
+                noisy_img = H(clean_img.clone().to(self.device))
+                alpha_g = beta_g = sigma_noise
+                noise = torch.distributions.Gamma(concentration=torch.tensor(alpha_g),
+                            rate=torch.tensor(beta_g)).sample(sample_shape=noisy_img.shape).to(self.device)
+                noisy_img = noisy_img * noise
             else:
                 raise ValueError('Noise type not supported')
 
@@ -102,6 +108,11 @@ class FLOW_PRIORS(object):
                         elif self.args.noise_type == 'laplace':
                             loss = lmbda * torch.sum(torch.abs(H(x_next) - y_next), dim=(
                                 1, 2, 3))
+                        elif self.args.noise_type == 'gamma':
+                            # neg log-likelihood for gamma: L*log(H(x)) + L*y/H(x)
+                            Hx = H(x_next)
+                            loss = lmbda * sigma_noise * torch.sum(
+                                torch.log(Hx) + y_next / Hx, dim=(1, 2, 3))
                         loss += 0.5 * \
                             torch.sum(x ** 2, dim=(1, 2, 3)) + trace_term * dt
                         loss = loss.sum()
@@ -127,6 +138,11 @@ class FLOW_PRIORS(object):
                         elif self.args.noise_type == 'laplace':
                             loss = lmbda * torch.sum(torch.abs(H(x_next) - y_next), dim=(
                                 1, 2, 3))
+                        elif self.args.noise_type == 'gamma':
+                            # neg log-likelihood for gamma: L*log(H(x)) + L*y/H(x)
+                            Hx = H(x_next)
+                            loss = lmbda * sigma_noise * torch.sum(
+                                torch.log(Hx) + y_next / Hx, dim=(1, 2, 3))
                         loss += trace_term * dt
                         loss = loss.sum()
 

@@ -39,10 +39,17 @@ class OT_ODE(object):
             (clean_img, labels) = next(loader)
             self.args.batch = batch
 
-            noisy_img = H(clean_img.clone().to(
-                self.device))  # .reshape(clean_img.shape)
-            torch.manual_seed(batch)
-            noisy_img += torch.randn_like(noisy_img) * sigma_noise
+            if self.args.noise_type == 'gamma':
+                noisy_img = H(clean_img.clone().to(self.device))
+                alpha_g = beta_g = sigma_noise
+                noise = torch.distributions.Gamma(concentration=torch.tensor(alpha_g),
+                            rate=torch.tensor(beta_g)).sample(sample_shape=noisy_img.shape).to(self.device)
+                noisy_img = noisy_img * noise
+            else:
+                noisy_img = H(clean_img.clone().to(
+                    self.device))  # .reshape(clean_img.shape)
+                torch.manual_seed(batch)
+                noisy_img += torch.randn_like(noisy_img) * sigma_noise
             noisy_img = noisy_img.to(self.device)
             clean_img = clean_img.to('cpu')
 
@@ -74,11 +81,18 @@ class OT_ODE(object):
                     x1_hat = x + (1-t1.view(-1, 1, 1, 1)) * vt
 
                     # sovle linear problem Cx=d
-                    d = noisy_img - H(x1_hat)
+                    if self.args.noise_type == 'gamma':
+                        # simplified gradient for multiplicative gamma noise: L*(y - H(x))
+                        d = sigma_noise * (noisy_img - H(x1_hat))
+                    else:
+                        d = noisy_img - H(x1_hat)
 
                     sol = torch.zeros_like(d)
 
-                    if self.args.problem == "inpainting" or self.args.problem == "random_inpainting" or self.args.problem == "paintbrush_inpainting":
+                    if self.args.noise_type == 'gamma':
+                        for i in range(d.shape[0]):
+                            sol[i] = (d[i] / (rt_squared[i] + sigma_noise)).reshape(d[i].shape)
+                    elif self.args.problem == "inpainting" or self.args.problem == "random_inpainting" or self.args.problem == "paintbrush_inpainting":
                         for i in range(d.shape[0]):
 
                             sol_tmp = 1 / \
