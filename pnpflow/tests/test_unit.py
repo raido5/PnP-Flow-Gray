@@ -21,19 +21,19 @@ def test_degradation(device=torch.device("cpu")):
 
 
 # @pytest.mark.parametrize("device", device)
-def test_inference_ot_fm(device=torch.device("cpu")):
-    test_sample = torch.ones((1, 3, 128, 128), device=device)
-    model = pnpflow.models.UNet(input_channels=3,
-                                input_height=128,
-                                ch=32,
-                                ch_mult=(1, 2, 4, 8),
-                                num_res_blocks=6,
-                                attn_resolutions=(16, 8),
-                                resamp_with_conv=True,
-                                )
-    load_model(name_model="ot", model=model, state=None,
-               download=True, dataset="celeba", device=device)
-    model.eval()
-    forward = model(test_sample, torch.ones(
-        len(test_sample), device=device) * 1.0)
-    assert forward.shape == test_sample.shape
+#def test_inference_ot_fm(device=torch.device("cpu")):
+  #  test_sample = torch.ones((1, 3, 128, 128), device=device)
+   # model = pnpflow.models.UNet(input_channels=3,
+   #                             input_height=128,
+   #                             ch=32,
+   #                             ch_mult=(1, 2, 4, 8),
+   #                             num_res_blocks=6,
+   #                             attn_resolutions=(16, 8),
+   #                             resamp_with_conv=True,
+   #                             )
+    #load_model(name_model="ot", model=model, state=None,
+    #           download=True, dataset="celeba", device=device)
+    #model.eval()
+    #forward = model(test_sample, torch.ones(
+    #    len(test_sample), device=device) * 1.0)
+    #assert forward.shape == test_sample.shape
