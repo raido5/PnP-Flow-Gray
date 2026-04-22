@@ -571,9 +571,7 @@ def postprocess(img, args):
         if args.dataset == "afhq_cat":
             img = (img + 1) / 2
         elif args.num_channels == 1:  # grayscale
-            invTrans = v2.Normalize(
-                mean=[-0.5 / 0.5], std=[1./0.5])
-            img = invTrans(img)
+            img = img / 255.0
         else:
             invTrans = v2.Normalize(
                 mean=[-0.5 / 0.5, -0.5 / 0.5, -0.5 / 0.5], std=[1./0.5, 1./0.5, 1./0.5])

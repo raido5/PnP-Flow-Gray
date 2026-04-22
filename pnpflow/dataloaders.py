@@ -27,7 +27,7 @@ class DataLoaders:
             v2.CenterCrop(178),
             v2.Resize((128, 128)),
             v2.ToTensor(),
-            v2.Normalize(mean=[0.5], std=[0.5])
+            v2.Lambda(lambda x: x * 255)
         ])
             # Paths
             img_dir = './data/celeba/img_align_celeba/'
