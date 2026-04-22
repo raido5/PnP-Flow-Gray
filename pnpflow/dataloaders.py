@@ -24,11 +24,11 @@ class DataLoaders:
 
         if self.dataset_name == 'celeba':
             transform = v2.Compose([
-                v2.CenterCrop(178),
-                v2.Resize((128, 128)),
-                v2.ToTensor(),
-                v2.Normalize(mean=[0.0], std=[1.0])
-            ])
+            v2.CenterCrop(178),
+            v2.Resize((128, 128)),
+            v2.ToTensor(),
+            v2.Normalize(mean=[0.5], std=[0.5])
+        ])
             # Paths
             img_dir = './data/celeba/img_align_celeba/'
             partition_csv = './data/celeba/list_eval_partition.csv'
