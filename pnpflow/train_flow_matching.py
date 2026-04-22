@@ -64,7 +64,7 @@ class FLOW_MATCHING(object):
             for iteration, (x, labels) in enumerate(train_loader):
                 if x.size(0) == 0:
                     continue
-                if iteration > 500:
+                if iteration > 200:
                     break
                 print(f'Epoch: {ep}, iter: {iteration}')
                 x = x.to(self.device)

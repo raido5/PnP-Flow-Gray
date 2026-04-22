@@ -1,2 +1,13 @@
 psnr_rec psnr_noisy steps_pnp lr_pnp gamma_style num_samples alpha 
 28.0626 16.5367 100 1.0 alpha_1_minus_t 5 1.0 
+28.5851 16.5367 50 1.0 alpha_1_minus_t 5 1.0 
+28.0626 16.5367 100 1.0 alpha_1_minus_t 5 1.0 
+26.7549 16.5367 200 1.0 alpha_1_minus_t 5 1.0 
+28.6739 16.5367 25 1.0 alpha_1_minus_t 5 1.0 
+28.1466 16.5367 10 1.0 alpha_1_minus_t 5 1.0 
+28.5851 16.5367 50 0.1 alpha_1_minus_t 5 1.0 
+28.5851 16.5367 50 0.5 alpha_1_minus_t 5 1.0 
+28.5851 16.5367 50 2.0 alpha_1_minus_t 5 1.0 
+26.1632 16.5367 50 0.1 alpha_1_minus_t 5 1.0 
+28.5851 16.5367 50 0.5 alpha_1_minus_t 5 1.0 
+24.5784 16.5367 50 2.0 alpha_1_minus_t 5 1.0 
