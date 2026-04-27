@@ -24,11 +24,11 @@ class DataLoaders:
 
         if self.dataset_name == 'celeba':
             transform = v2.Compose([
-            v2.CenterCrop(178),
-            v2.Resize((128, 128)),
-            v2.ToTensor(),
-            v2.Lambda(lambda x: x * 255)
-        ])
+                v2.CenterCrop(178),
+                v2.Resize((128, 128)),
+                v2.ToTensor(),
+                v2.Normalize(mean=[0.5], std=[0.5])
+            ])
             # Paths
             img_dir = './data/celeba/img_align_celeba/'
             partition_csv = './data/celeba/list_eval_partition.csv'
@@ -108,6 +108,38 @@ class DataLoaders:
                 batch_size=self.batch_size_train,
                 shuffle=True,
                 collate_fn=custom_collate, drop_last=True)
+
+        elif self.dataset_name == 'sar':
+            transform_train = v2.Compose([
+                v2.Grayscale(num_output_channels=1),
+                v2.RandomCrop(128),
+                v2.ToTensor(),
+            ])
+            transform_test = v2.Compose([
+                v2.Grayscale(num_output_channels=1),
+                v2.CenterCrop(128),
+                v2.ToTensor(),
+            ])
+
+            train_dataset = SARDataset('./data/sar/train', transform=transform_train)
+            val_dataset = SARDataset('./data/sar/val', transform=transform_test)
+            test_dataset = SARDataset('./data/sar/test', transform=transform_test)
+
+            train_loader = DataLoader(
+                train_dataset,
+                batch_size=self.batch_size_train,
+                shuffle=True,
+                collate_fn=custom_collate)
+            val_loader = DataLoader(
+                val_dataset,
+                batch_size=self.batch_size_test,
+                shuffle=False,
+                collate_fn=custom_collate)
+            test_loader = DataLoader(
+                test_dataset,
+                batch_size=self.batch_size_test,
+                shuffle=False,
+                collate_fn=custom_collate)
 
         else:
             raise ValueError("The dataset your entered does not exist")
@@ -207,6 +239,33 @@ class AFHQDataset(Dataset):
         if self.transform:
             image = self.transform(image)
 
+        return image, 0
+
+
+class SARDataset(Dataset):
+    """SAR grayscale dataset. Expects .tif or .png images in img_dir."""
+
+    EXTENSIONS = {'.tif', '.tiff', '.png'}
+
+    def __init__(self, img_dir, transform=None):
+        self.img_dir = img_dir
+        self.transform = transform
+        self.files = sorted([
+            f for f in os.listdir(img_dir)
+            if os.path.splitext(f)[1].lower() in self.EXTENSIONS
+        ])
+
+    def __len__(self):
+        return len(self.files)
+
+    def __getitem__(self, idx):
+        img_path = os.path.join(self.img_dir, self.files[idx])
+        if not os.path.exists(img_path):
+            warnings.warn(f"File not found: {img_path}. Skipping.")
+            return None, None
+        image = Image.open(img_path).convert('L')
+        if self.transform:
+            image = self.transform(image)
         return image, 0
 
 
