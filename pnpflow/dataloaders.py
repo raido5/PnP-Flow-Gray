@@ -114,11 +114,13 @@ class DataLoaders:
                 v2.Grayscale(num_output_channels=1),
                 v2.RandomCrop(128),
                 v2.ToTensor(),
+                v2.Normalize(mean=[0.5], std=[0.5]),
             ])
             transform_test = v2.Compose([
                 v2.Grayscale(num_output_channels=1),
                 v2.CenterCrop(128),
                 v2.ToTensor(),
+                v2.Normalize(mean=[0.5], std=[0.5]),
             ])
 
             train_dataset = SARDataset('./data/sar/train', transform=transform_train)
