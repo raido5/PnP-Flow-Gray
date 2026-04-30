@@ -18,6 +18,7 @@ EVAL:
     max_batch: 1               # number of batches of size 4 for evaluation
     batch_size_ip : 4
     noise_type: 'gaussian'          # noise type for inverse problem (gaussian, poisson))
+    normalization: 'minus1_plus1'   # image parametrization (minus1_plus1, 0_1, 0_255)
     compute_memory: False
     compute_time: False
     save_results: True

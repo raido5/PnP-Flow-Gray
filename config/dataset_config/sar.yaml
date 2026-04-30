@@ -1,3 +1,4 @@
 DATASET:
     dim_image: 128
     num_channels: 1
+    normalization: '0_1'
